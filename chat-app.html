@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="chat-app.css">
+  <title>chat-app</title>
+  <noscript>
+    <p>JavaScriptをオンにしてください</p>
+  </noscript>
+</head>
+
+<body>
+  <div> 
+    <textarea name="message" id="message" cols="30" rows="5"></textarea>
+    <button id="send">投稿</button>
+  </div>
+  <ol id="messages" style="list-style-type: decimal">
+  </ol>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
+  <script src="https://cdn.firebase.com/js/client/2.3.2/firebase.js"></script>
+  <!-- 認証確認するためにauthも読み込む -->
+  <script src="https://www.gstatic.com/firebasejs/4.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/4.10.1/firebase-auth.js"></script>
+  <script>
+    var config = {
+      apiKey: "AIzaSyAhEuEemmDNmBUQ6gmmetbPWyY--z31ScU",
+      authDomain: "test-webapp-3eb80.firebaseapp.com",
+    };
+    firebase.initializeApp(config);
+    // 認証されているか確認
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        // User is signed in.
+        console.log('auth user', user);
+      } else {
+        // No user is signed in.
+        location.href = "../index.html";
+      }
+    });
+    // データベースの参照を準備
+    var firebaseRef = new Firebase("https://test-webapp-3eb80.firebaseio.com/"); // ... 1
+    var messagesRef = firebaseRef.child('messages'); // ... 2
+
+    // 既存メッセージを表示、child_addedで変更時だけトリガーされる
+    messagesRef.on('child_added', function (snapshot) { // ... 3
+      var msg = snapshot.val();
+      $('<li>').text(msg.time+":"+msg.body).prependTo('#messages');
+    });
+
+    $('#send').click(function () {
+      var date=new Date();
+      var Year=date.getFullYear();
+      var Month=date.getMonth()+1;
+      var Date1=date.getDate();
+      var Hours=date.getHours();
+      var minutes=date.getMinutes();
+      var seconds=date.getSeconds();
+      console.log(date);
+      // var Date1=date.getDate();
+      // 新規メッセージを投稿
+      messagesRef.push({ 
+        time: Year+"/"+Month+"/"+Date1+" "+Hours+":"+minutes+":"+seconds,
+        body: $('#message').val()
+      });
+      
+    });
+  </script>
+</body>
+
+</html>
